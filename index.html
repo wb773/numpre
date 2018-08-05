@@ -1,12 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
 </head>
+
 <body>
-    
+  <div id="vm">
+    <div class="container">
+      <div style="margin:30px">
+        <div class="row justify-content-md-center" v-for="row in data.rows">
+          <div v-for="col in row.colomns" style="border: solid 1px red; width: 75px; height: 75px; margin: 0 0 -1px -1px ; " v-on:click='clickPanel(col)'>
+
+            <!-- 問題として提出される値 -->
+            <div v-if="col.determined" style="background-color: yellow; height:100%; display: flex; align-items: center; justify-content: center;">
+              <h1>{{col.determinedNumber}}</h1>
+            </div>
+
+            <!-- 問題として提出される値 -->
+            <div v-if="!col.determined" style="display: flex; flex-wrap: wrap; width:45px; height: 45px; align-content: space-between; background-color:greenyellow;">
+
+              <div style="width:15px; height: 15px;margin: 0; background-color: tan; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                <span v-if="col.candidates.num1">1</span>
+              </div>
+              <div style="width:15px; height: 15px;margin: 0; background-color: tan; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                <span v-if="col.candidates.num2">2</span>
+              </div>
+              <div style="width:15px; height: 15px;margin: 0; background-color: tan; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                <span v-if="col.candidates.num3">3</span>
+              </div>
+              <div style="width:15px; height: 15px;margin: 0; background-color: tan; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                <span v-if="col.candidates.num4">4</span>
+              </div>
+              <div style="width:15px; height: 15px;margin: 0; background-color: tan; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                <span v-if="col.candidates.num5">5</span>
+              </div>
+              <div style="width:15px; height: 15px;margin: 0; background-color: tan; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                <span v-if="col.candidates.num6">6</span>
+              </div>
+              <div style="width:15px; height: 15px;margin: 0; background-color: tan; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                <span v-if="col.candidates.num7">7</span>
+              </div>
+              <div style="width:15px; height: 15px;margin: 0; background-color: tan; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                <span v-if="col.candidates.num8">8</span>
+              </div>
+              <div style="width:15px; height: 15px;margin: 0; background-color: tan; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                <span v-if="col.candidates.num9">9</span>
+              </div>
+
+            </div>
+            <!-- コミットされた値がある場合 -->
+            <div style="border: gray solid 1px; height: 25px; width: 25px; margin: 2px" class="float-right">
+              <div v-if="col.commit" style="font-size: 16px; display: flex; align-items: center; justify-content: center;">
+                {{col.commitNumber}}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <label class="align-text-top col-2">固定：</label>
+      <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <!-- 1~9の数字 -->
+        
+        <label class="btn btn-warning" v-for="n in 9">
+          <input type="radio" name="options0" v-on:change='setCandidates(n)'> {{n}}
+        </label>
+
+        <label class="btn btn-warning">
+          <input type="radio" name="options0" value="0"> clear
+        </label>
+      </div>
+    </div>
+
+
+    <div class="container">
+      <label class="align-text-top col-2">候補：</label>
+      <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-primary">
+          <input type="radio" name="options1" value="1"> 1
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options1" value="2"> 2
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options1" value="3"> 3
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options1" value="4"> 4
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options1" value="5"> 5
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options1" value="6"> 6
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options1" value="7"> 7
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options1" value="8"> 8
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options1" value="9"> 9
+        </label>
+      </div>
+    </div>
+
+    <div class="container">
+      <label class="align-text-top col-2">候補から削除 ：</label>
+      <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-primary">
+          <input type="radio" name="options2" value="1"> 1
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options2" value="2"> 2
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options2" value="3"> 3
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options2" value="4"> 4
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options2" value="5"> 5
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options2" value="6"> 6
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options2" value="7"> 7
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options2" value="8"> 8
+        </label>
+        <label class="btn btn-primary">
+          <input type="radio" name="options2" value="9"> 9
+        </label>
+      </div>
+    </div>
+
+    <div class="container">
+      <label class="align-text-top col-2">確定：</label>
+      <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-success">
+          <input type="radio" name="options3" value="1"> 1
+        </label>
+        <label class="btn btn-success">
+          <input type="radio" name="options3" value="2"> 2
+        </label>
+        <label class="btn btn-success">
+          <input type="radio" name="options3" value="3"> 3
+        </label>
+        <label class="btn btn-success">
+          <input type="radio" name="options3" value="4"> 4
+        </label>
+        <label class="btn btn-success">
+          <input type="radio" name="options3" value="5"> 5
+        </label>
+        <label class="btn btn-success">
+          <input type="radio" name="options3" value="6"> 6
+        </label>
+        <label class="btn btn-success">
+          <input type="radio" name="options3" value="7"> 7
+        </label>
+        <label class="btn btn-success">
+          <input type="radio" name="options3" value="8"> 8
+        </label>
+        <label class="btn btn-success">
+          <input type="radio" name="options3" value="9"> 9
+        </label>
+        <label class="btn btn-success">
+          <input type="radio" name="options1" value="0"> clear
+        </label>
+      </div>
+    </div>
+  </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+      crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+      crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+      // $('input[name="options0"]:radio').change(function () {
+      //   var radioval = $(this).val();
+      //   console.log(radioval);
+      //   $('input[name="options1"]:radio').parent().removeClass("active");
+      //   $('input[name="options2"]:radio').parent().removeClass("active");
+      //   $('input[name="options3"]:radio').parent().removeClass("active");
+
+
+
+      // });
+      // $('input[name="options1"]:radio').change(function () {
+      //   var radioval = $(this).val();
+      //   console.log(radioval);
+      //   $('input[name="options0"]:radio').parent().removeClass("active");
+      //   $('input[name="options2"]:radio').parent().removeClass("active");
+      //   $('input[name="options3"]:radio').parent().removeClass("active");
+      // });
+      // $('input[name="options2"]:radio').change(function () {
+      //   var radioval = $(this).val();
+      //   console.log(radioval);
+      //   $('input[name="options0"]:radio').parent().removeClass("active");
+      //   $('input[name="options1"]:radio').parent().removeClass("active");
+      //   $('input[name="options3"]:radio').parent().removeClass("active");
+      // });
+      // $('input[name="options3"]:radio').change(function () {
+      //   var radioval = $(this).val();
+      //   console.log(radioval);
+      //   $('input[name="options0"]:radio').parent().removeClass("active");
+      //   $('input[name="options1"]:radio').parent().removeClass("active");
+      //   $('input[name="options2"]:radio').parent().removeClass("active");
+      // });
+
+    </script>
+
+
+    <script type="text/javascript">
+
+      var createInitialData = function () {
+
+        var data = { rows: [] };
+
+        for (var i = 1; i < 10; i++) {
+          var row = {
+            rownum: i,
+            colomns: []
+          };
+
+          for (var j = 1; j < 10; j++) {
+            var col = {
+              rownum: i,
+              colnum: j,
+              determined: false,  //問題の値
+              determinedNumber: 0, //問題の値の数字
+              commit: true, //決定した数字
+              commitNumber: 0, //決定した数字
+              candidates: { //候補
+                num1: false,
+                num2: false,
+                num3: false,
+                num4: false,
+                num5: false,
+                num6: false,
+                num7: false,
+                num8: false,
+                num9: false
+              }
+            }
+            row.colomns.push(col);
+          }
+
+          data.rows.push(row);
+        }
+        return data;
+      }
+
+      var data = createInitialData();
+
+      var vm = new Vue({
+        el: "#vm",
+        data: {
+          rows: data,
+          mode: null,
+          num: null
+        },
+        methods: {
+          clickPanel: function (col) {
+            console.log("row:" + col.rownum + " col:" + col.colnum);
+            if (this.mode === null || this.num === null) {
+              return;
+            }
+
+
+          },
+          setDetermined: function (number) {
+            console.log("setDetermined: " + number );
+          },
+          setCandidates: function () {
+            console.log("setCandidates: " );
+          },
+          setCandidatesClear: function () {
+
+          },
+          setCommit: function () {
+
+          }
+        }
+      });
+
+    </script>
+
 </body>
+
 </html>
