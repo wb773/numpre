@@ -71,49 +71,20 @@
     <div class="container">
       <label class="align-text-top col-2">固定：</label>
       <div class="btn-group btn-group-toggle" data-toggle="buttons">
-
-        <label class="btn btn-primary" v-for="n in 10">
+        <label class="btn btn-primary" v-for="n in 9">
           <input type="radio" name="options0" v-bind:value="n"> {{n}}
         </label>
-
-
-
         <label class="btn btn-warning">
           <input type="radio" name="options0" value="0"> clear
         </label>
       </div>
     </div>
 
-
     <div class="container">
       <label class="align-text-top col-2">候補：</label>
       <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-primary">
-          <input type="radio" name="options1" value="1"> 1
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options1" value="2"> 2
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options1" value="3"> 3
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options1" value="4"> 4
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options1" value="5"> 5
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options1" value="6"> 6
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options1" value="7"> 7
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options1" value="8"> 8
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options1" value="9"> 9
+        <label class="btn btn-primary" v-for="n in 9">
+          <input type="radio" name="options1" v-bind:value="n"> {{n}}
         </label>
       </div>
     </div>
@@ -121,32 +92,8 @@
     <div class="container">
       <label class="align-text-top col-2">候補から削除 ：</label>
       <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-primary">
-          <input type="radio" name="options2" value="1"> 1
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options2" value="2"> 2
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options2" value="3"> 3
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options2" value="4"> 4
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options2" value="5"> 5
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options2" value="6"> 6
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options2" value="7"> 7
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options2" value="8"> 8
-        </label>
-        <label class="btn btn-primary">
-          <input type="radio" name="options2" value="9"> 9
+        <label class="btn btn-primary" v-for="n in 9">
+          <input type="radio" name="options2" v-bind:value="n"> {{n}}
         </label>
       </div>
     </div>
@@ -154,35 +101,11 @@
     <div class="container">
       <label class="align-text-top col-2">確定：</label>
       <div class="btn-group btn-group-toggle" data-toggle="buttons">
-        <label class="btn btn-success">
-          <input type="radio" name="options3" value="1"> 1
+        <label class="btn btn-primary" v-for="n in 9">
+          <input type="radio" name="options3" v-bind:value="n"> {{n}}
         </label>
         <label class="btn btn-success">
-          <input type="radio" name="options3" value="2"> 2
-        </label>
-        <label class="btn btn-success">
-          <input type="radio" name="options3" value="3"> 3
-        </label>
-        <label class="btn btn-success">
-          <input type="radio" name="options3" value="4"> 4
-        </label>
-        <label class="btn btn-success">
-          <input type="radio" name="options3" value="5"> 5
-        </label>
-        <label class="btn btn-success">
-          <input type="radio" name="options3" value="6"> 6
-        </label>
-        <label class="btn btn-success">
-          <input type="radio" name="options3" value="7"> 7
-        </label>
-        <label class="btn btn-success">
-          <input type="radio" name="options3" value="8"> 8
-        </label>
-        <label class="btn btn-success">
-          <input type="radio" name="options3" value="9"> 9
-        </label>
-        <label class="btn btn-success">
-          <input type="radio" name="options1" value="0"> clear
+          <input type="radio" name="options3" value="0"> clear
         </label>
       </div>
     </div>
@@ -244,8 +167,7 @@
       data: {
         rows: data,
         mode: null,
-        num: null,
-        update: null
+        num: null
       },
       methods: {
         clickPanel: function (col) {
@@ -254,32 +176,74 @@
             return;
           }
           console.log("Panel click mode:" + this.mode + " num:" + this.num);
-          if(this.mode == "Determined"){
+
+          switch (this.mode) {
+            case "Determined":
+              col.determined = true;
+              col.determinedNumber = this.num
+              break;
+
+            case "DeterminedClear":
+              col.determined = false;
+              col.determinedNumber = this.num
+              break;
+
+            case "Candidates":
+              var prop = "num" + this.num
+              col.candidates[prop] = true;
+              break;
+
+            case "CandidatesClear":
+              var prop = "num" + this.num
+              col.candidates[prop] = false;
+              break;
+
+            case "Commit":
+              col.commit = true;
+              col.commitNumber = this.num
+              break;
+
+            case "CommitClear":
+              col.commit = false;
+              col.commitNumber = this.num
+              break;
+            default:
+              break;
+          }
+
+
+          if (this.mode == "Determined") {
             col.determined = true;
             col.determinedNumber = this.num;
           }
 
         },
         setDetermined: function (num) {
-          console.log("setDetermined: " + this.update);
+          console.log("setDetermined: ");
           this.mode = "Determined";
           this.num = num;
         },
         setDeterminedClear: function () {
-          console.log("setDeterminedClear: " + this.update);
-          
+          console.log("setDeterminedClear: ");
+          this.mode = "DeterminedClear";
+          this.num = 0;
         },
-        setCandidates: function () {
+        setCandidates: function (num) {
           console.log("setCandidates: ");
+          this.mode = "Candidates";
+          this.num = num;
         },
-        setCandidatesClear: function () {
-
+        setCandidatesClear: function (num) {
+          this.mode = "CandidatesClear";
+          this.num = num;
         },
-        setCommit: function () {
-
+        setCommit: function (num) {
+          this.mode = "Commit";
+          this.num = num;
         },
-        onChange: function () {
-          console.log("aaa");
+        setCommitClear: function () {
+          this.mode = "CommitClear";
+          this.num = 0;
         }
       }
     });
@@ -289,7 +253,11 @@
 
     $('input[name="options0"]:radio').change(function () {
       var radioval = $(this).val();
-      vm.setDetermined(radioval);
+      if (radioval > 0) {
+        vm.setDetermined(radioval);
+      } else {
+        vm.setDeterminedClear();
+      }
       // console.log(radioval);
       $('input[name="options1"]:radio').parent().removeClass("active");
       $('input[name="options2"]:radio').parent().removeClass("active");
@@ -297,21 +265,28 @@
     });
     $('input[name="options1"]:radio').change(function () {
       var radioval = $(this).val();
-      console.log(radioval);
+      vm.setCandidates(radioval);
+      // console.log(radioval);
       $('input[name="options0"]:radio').parent().removeClass("active");
       $('input[name="options2"]:radio').parent().removeClass("active");
       $('input[name="options3"]:radio').parent().removeClass("active");
     });
     $('input[name="options2"]:radio').change(function () {
       var radioval = $(this).val();
-      console.log(radioval);
+      vm.setCandidatesClear(radioval);
+      // console.log(radioval);
       $('input[name="options0"]:radio').parent().removeClass("active");
       $('input[name="options1"]:radio').parent().removeClass("active");
       $('input[name="options3"]:radio').parent().removeClass("active");
     });
     $('input[name="options3"]:radio').change(function () {
       var radioval = $(this).val();
-      console.log(radioval);
+      if (radioval > 0) {
+        vm.setCommit(radioval);
+      } else {
+        vm.setCommitClear();
+      }
+      // console.log(radioval);
       $('input[name="options0"]:radio').parent().removeClass("active");
       $('input[name="options1"]:radio').parent().removeClass("active");
       $('input[name="options2"]:radio').parent().removeClass("active");
