@@ -116,9 +116,11 @@
     </div>
 
     <div class="container">
-      <button type="button" v-on:click="saveBoard()" class="btn btn-secondary">保存</button>
-      <button type="button" v-on:click="loadBoard()" class="btn btn-secondary">ロード</button>
-      <button type="button" v-on:click="clearBoard()" class="btn btn-secondary">クリア</button>
+      <div class="float-right">
+          <button type="button" v-on:click="saveBoard()" class="btn btn-secondary">保存</button>
+          <button type="button" v-on:click="loadBoard()" class="btn btn-secondary">ロード</button>
+          <button type="button" v-on:click="clearBoard()" class="btn btn-secondary">クリア</button>
+          </div>
     </div>
 
   </div>
