@@ -20,7 +20,7 @@
   <div id="vm">
     <div class="container">
       <div style="margin:30px">
-        <div class="row justify-content-md-center" v-for="row in data.rows">
+        <div class="row justify-content-md-center" v-for="row in dataset.maindata">
           <div v-for="col in row.colomns" style="border: solid 1px red; width: 75px; height: 75px; margin: 0 0 -1px -1px ; " v-on:click='clickPanel(col)'
             v-bind:class="{ highLight: col.isHighlight }">
 
@@ -116,9 +116,9 @@
     </div>
 
     <div class="container">
-        <button type="button" v-on:click="saveBoard()" class="btn btn-secondary">保存</button>
-        <button type="button" id="loadNumbers" class="btn btn-secondary">ロード</button>
-        <button type="button" id="clearNumbers" class="btn btn-secondary">クリア</button>
+      <button type="button" v-on:click="saveBoard()" class="btn btn-secondary">保存</button>
+      <button type="button" v-on:click="loadBoard()" class="btn btn-secondary">ロード</button>
+      <button type="button" v-on:click="clearBoard()" class="btn btn-secondary">クリア</button>
     </div>
 
   </div>
@@ -148,7 +148,6 @@
       }
       return tbl
     }
-    var arrayData = createEmptyArr();
 
     // ---------------------------------------
     // エリア判定用のメソッドと各納器
@@ -158,12 +157,9 @@
       var colArea = Math.floor((colnum - 1) / 3) + 1;
       return rowArea + "" + colArea;
     }
-    var areas = {};
-
 
     // Highlightの判定
     var isHighlight = function () {
-      console.log(vm);
       var vmnum = vm.getNum();
       if (!vmnum) {
         return false;
@@ -177,75 +173,79 @@
       }
     }
 
-    // 各calcの一意の番号
-    var id = 0;
+    var createDataset = function () {
 
-    var createInitialData = function () {
+      var dataset = {
+        areas: {},
+        arrayData: createEmptyArr(),
+        maindata: null
+      };
 
-      var data = { rows: [] };
+      var createInitialData = function () {
 
-      for (var i = 1; i < 10; i++) {
-        var row = {
-          rownum: i,
-          colomns: []
-        };
+        // 各calcの一意の番号
+        var id = 0;
+        var rowdata = [];
 
-        for (var j = 1; j < 10; j++) {
-
-          //エリアを算出
-          var areanum = calcArea(i, j);
-          if (!areas[areanum]) {
-            areas[areanum] = [];
-          }
-
-          var col = {
-            id: ++id,
-            areanum: areanum,
+        for (var i = 1; i < 10; i++) {
+          var row = {
             rownum: i,
-            colnum: j,
-            determined: false,  //問題の値
-            determinedNumber: 0, //問題の値の数字
-            commit: false, //決定した数字
-            commitNumber: 0, //決定した数字
-            candidates: { //候補
-              num1: true,
-              num2: true,
-              num3: true,
-              num4: true,
-              num5: true,
-              num6: true,
-              num7: true,
-              num8: true,
-              num9: true
-            },
-            isHighlight: false
+            colomns: []
+          };
+
+          for (var j = 1; j < 10; j++) {
+
+            //エリアを算出
+            var areanum = calcArea(i, j);
+            if (!dataset.areas[areanum]) {
+              dataset.areas[areanum] = [];
+            }
+
+            var col = {
+              id: ++id,
+              areanum: areanum,
+              rownum: i,
+              colnum: j,
+              determined: false,  //問題の値
+              determinedNumber: 0, //問題の値の数字
+              commit: false, //決定した数字
+              commitNumber: 0, //決定した数字
+              candidates: { //候補
+                num1: true,
+                num2: true,
+                num3: true,
+                num4: true,
+                num5: true,
+                num6: true,
+                num7: true,
+                num8: true,
+                num9: true
+              },
+              isHighlight: false
+            }
+            dataset.arrayData[i][j] = col;
+            row.colomns.push(col);
+            dataset.areas[areanum].push(col);
           }
-
-          arrayData[i][j] = col;
-          row.colomns.push(col);
-          areas[areanum].push(col);
-
+          rowdata.push(row);
         }
-
-        data.rows.push(row);
+        return rowdata;
       }
-      return data;
+      dataset.maindata = createInitialData();
+      return dataset;
     }
 
-    var data = createInitialData();
+    var datasetItem = createDataset();
 
     var vm = new Vue({
       el: "#vm",
       data: {
-        arrayData: arrayData,
-        areas: areas,
-        rows: data,
+        dataset: datasetItem,
         mode: null,
         num: null
       },
       methods: {
         clickPanel: function (col) {
-          console.log("row:" + col.rownum + " col:" + col.colnum);
           if (this.mode === null || this.num === null) {
             return;
           }
@@ -338,21 +338,21 @@
         },
         clearRowCandidates: function (col, num, setBool) {
           for (var i = 1; i < 10; i++) {
-            var targetCol = arrayData[col.rownum][i];
+            var targetCol = this.dataset.arrayData[col.rownum][i];
             var prop = "num" + num;
             targetCol.candidates[prop] = setBool;
           }
         },
         clearColCandidates: function (col, num, setBool) {
           for (var i = 1; i < 10; i++) {
-            var targetCol = arrayData[i][col.colnum];
+            var targetCol = this.dataset.arrayData[i][col.colnum];
             var prop = "num" + num;
             targetCol.candidates[prop] = setBool;
           }
 
         },
         clearAreaCandidates: function (col, num, setBool) {
-          var area = areas[col.areanum];
+          var area = this.dataset.areas[col.areanum];
           for (var i = 0; i < 9; i++) {
             var targetCol = area[i];
             var prop = "num" + num;
@@ -364,7 +364,7 @@
           for (var i = 1; i < 10; i++) {
             for (var j = 1; j < 10; j++) {
 
-              var targetCol = arrayData[i][j];
+              var targetCol = this.dataset.arrayData[i][j];
               if (targetCol.commit) {
                 targetCol.isHighlight = false;
                 return;
@@ -373,25 +373,32 @@
               var prop = "num" + num;
               if (targetCol.candidates[prop]) {
                 targetCol.isHighlight = true;
-                console.log("Highlight id:" + targetCol.id);
               } else {
                 targetCol.isHighlight = false;
-                console.log("UnHighlight id:" + targetCol.id);
               }
 
             }
           }
         },
-        saveBoard: function(){
+        saveBoard: function () {
           console.log("save data.");
+          localStorage.setItem("arrayData", JSON.stringify(this.dataset.arrayData));
+          localStorage.setItem("areas", JSON.stringify(this.dataset.areas));
+          localStorage.setItem("maindata", JSON.stringify(this.dataset.maindata));
         },
-        loadBoard: function(){
+        loadBoard: function () {
           console.log("load data.");
-
+          this.dataset.arrayData = JSON.parse(localStorage.getItem("arrayData"));
+          this.dataset.areas = JSON.parse(localStorage.getItem("areas"));
+          this.dataset.maindata = JSON.parse(localStorage.getItem("maindata"));
         },
-        clearBoard: function(){
+        clearBoard: function () {
           console.log("clear data.");
-         
+          var dataset = createDataset();
+          this.dataset.arrayData = dataset.arrayData;
+          this.dataset.areas = dataset.areas;
+          this.dataset.maindata = dataset.maindata;
+
         }
       }
     });
