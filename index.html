@@ -117,10 +117,10 @@
 
     <div class="container">
       <div class="float-right">
-          <button type="button" v-on:click="saveBoard()" class="btn btn-secondary">保存</button>
-          <button type="button" v-on:click="loadBoard()" class="btn btn-secondary">ロード</button>
-          <button type="button" v-on:click="clearBoard()" class="btn btn-secondary">クリア</button>
-          </div>
+        <button type="button" v-on:click="saveBoard()" class="btn btn-secondary">保存</button>
+        <button type="button" v-on:click="loadBoard()" class="btn btn-secondary">ロード</button>
+        <button type="button" v-on:click="clearBoard()" class="btn btn-secondary">クリア</button>
+      </div>
     </div>
 
   </div>
@@ -158,21 +158,6 @@
       var rowArea = Math.floor((rownum - 1) / 3) + 1;
       var colArea = Math.floor((colnum - 1) / 3) + 1;
       return rowArea + "" + colArea;
-    }
-
-    // Highlightの判定
-    var isHighlight = function () {
-      var vmnum = vm.getNum();
-      if (!vmnum) {
-        return false;
-      }
-
-      var prop = "num" + vmnum;
-      if (this.candidates[prop]) {
-        return true;
-      } else {
-        return false;
-      }
     }
 
     var createDataset = function () {
@@ -366,8 +351,11 @@
           for (var i = 1; i < 10; i++) {
             for (var j = 1; j < 10; j++) {
 
+              //１パネルずつ見ていく
               var targetCol = this.dataset.arrayData[i][j];
+              console.log(targetCol);
               if (targetCol.commit) {
+                //コミット済みはハイライトしない
                 targetCol.isHighlight = false;
                 return;
               }
@@ -382,17 +370,39 @@
             }
           }
         },
+        clearHighLight: function () {
+          console.log("clearHighLight");
+          for (var i = 1; i < 10; i++) {
+            for (var j = 1; j < 10; j++) {
+
+              //１パネルずつ見ていく
+              var targetCol = this.dataset.arrayData[i][j];
+              targetCol.isHighlight = false;
+            }
+          }
+        },
         saveBoard: function () {
           console.log("save data.");
-          localStorage.setItem("arrayData", JSON.stringify(this.dataset.arrayData));
-          localStorage.setItem("areas", JSON.stringify(this.dataset.areas));
-          localStorage.setItem("maindata", JSON.stringify(this.dataset.maindata));
+          //localStorage.setItem("arrayData", JSON.stringify(this.dataset.arrayData));
+          //localStorage.setItem("areas", JSON.stringify(this.dataset.areas));
+          //localStorage.setItem("maindata", JSON.stringify(this.dataset.maindata));
+          
+          localStorage.setItem("dataset", JSON.stringify(this.dataset));
         },
         loadBoard: function () {
           console.log("load data.");
-          this.dataset.arrayData = JSON.parse(localStorage.getItem("arrayData"));
-          this.dataset.areas = JSON.parse(localStorage.getItem("areas"));
-          this.dataset.maindata = JSON.parse(localStorage.getItem("maindata"));
+          //this.dataset.arrayData = JSON.parse(localStorage.getItem("arrayData"));
+          //this.dataset.areas = JSON.parse(localStorage.getItem("areas"));
+          //this.dataset.maindata = JSON.parse(localStorage.getItem("maindata"));
+          
+          //this.$set(this.dataset, 'arrayData', JSON.parse(localStorage.getItem("arrayData")));
+          //this.$set(this.dataset, 'areas', JSON.parse(localStorage.getItem("areas")));
+          //this.$set(this.dataset, 'maindata', JSON.parse(localStorage.getItem("maindata")));
+
+          this.$set(this, 'dataset', JSON.parse(localStorage.getItem("dataset")));
+
+          this.clearHighLight();
+          this.$forceUpdate();
         },
         clearBoard: function () {
           console.log("clear data.");
