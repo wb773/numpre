@@ -9,9 +9,16 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
     crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+
+
   <style type="text/css">
     .highLight {
       background-color: coral
+    }
+
+    .onlyOne {
+      background-color: aquamarine
     }
   </style>
 </head>
@@ -20,9 +27,9 @@
   <div id="vm">
     <div class="container">
       <div style="margin:30px">
-        <div class="row justify-content-md-center" v-for="row in dataset.maindata">
-          <div v-for="col in row.colomns" style="border: solid 1px red; width: 75px; height: 75px; margin: 0 0 -1px -1px ; " v-on:click='clickPanel(col)'
-            v-bind:class="{ highLight: col.isHighlight }">
+        <div class="row justify-content-md-center" v-for="row in maindata">
+          <div v-for="col in row.columns" style="border: solid 1px red; width: 75px; height: 75px; margin: 0 0 -1px -1px ; " v-on:click='clickPanel(col)'
+            v-bind:class="{ highLight: col.isHighlight , onlyOne: col.isOnlyOne}">
 
             <!-- 問題として提出される値 -->
             <div v-if="col.determined" style="background-color: yellow; height:100%; display: flex; align-items: center; justify-content: center;">
@@ -160,78 +167,92 @@
       return rowArea + "" + colArea;
     }
 
-    var createDataset = function () {
 
-      var dataset = {
-        areas: {},
-        arrayData: createEmptyArr(),
-        maindata: null
-      };
+    var dataset = {
+      areas: {},
+      arrayData: createEmptyArr()
+    };
 
-      var createInitialData = function () {
+    var createMainData = function () {
+      // 各calcの一意の番号
+      var id = 0;
+      var rowdata = [];
 
-        // 各calcの一意の番号
-        var id = 0;
-        var rowdata = [];
+      for (var i = 1; i < 10; i++) {
+        var row = {
+          rownum: i,
+          columns: []
+        };
 
-        for (var i = 1; i < 10; i++) {
-          var row = {
-            rownum: i,
-            colomns: []
-          };
+        for (var j = 1; j < 10; j++) {
 
-          for (var j = 1; j < 10; j++) {
-
-            //エリアを算出
-            var areanum = calcArea(i, j);
-            if (!dataset.areas[areanum]) {
-              dataset.areas[areanum] = [];
-            }
-
-            var col = {
-              id: ++id,
-              areanum: areanum,
-              rownum: i,
-              colnum: j,
-              determined: false,  //問題の値
-              determinedNumber: 0, //問題の値の数字
-              commit: false, //決定した数字
-              commitNumber: 0, //決定した数字
-              candidates: { //候補
-                num1: true,
-                num2: true,
-                num3: true,
-                num4: true,
-                num5: true,
-                num6: true,
-                num7: true,
-                num8: true,
-                num9: true
-              },
-              isHighlight: false
-            }
-            dataset.arrayData[i][j] = col;
-            row.colomns.push(col);
-            dataset.areas[areanum].push(col);
+          //エリアを算出
+          var areanum = calcArea(i, j);
+          if (!dataset.areas[areanum]) {
+            dataset.areas[areanum] = [];
           }
-          rowdata.push(row);
+
+          var col = {
+            id: ++id,
+            areanum: areanum,
+            rownum: i,
+            colnum: j,
+            determined: false,  //問題の値
+            determinedNumber: 0, //問題の値の数字
+            commit: false, //決定した数字
+            commitNumber: 0, //決定した数字
+            candidates: { //候補
+              num1: true,
+              num2: true,
+              num3: true,
+              num4: true,
+              num5: true,
+              num6: true,
+              num7: true,
+              num8: true,
+              num9: true
+            },
+            isHighlight: false,
+            getCandidatesNumArr: function () {
+              var candidatesNumArr = [];
+              for (i = 1; i < 10; i++) {
+                if (this.candidates[("num" + i)]) {
+                  candidatesNumArr.push(i);
+                }
+              }
+            },
+            isOnlyOne: false
+          }
+          dataset.arrayData[i][j] = col;
+          row.columns.push(col);
+          dataset.areas[areanum].push(col);
         }
-        return rowdata;
+        rowdata.push(row);
       }
-      dataset.maindata = createInitialData();
-      return dataset;
+      return rowdata;
+
     }
 
-    var datasetItem = createDataset();
 
     var vm = new Vue({
       el: "#vm",
       data: {
-        dataset: datasetItem,
+        maindata: createMainData(),
+        areas: null,
+        arrayData: null,
         mode: null,
-        num: null
+        num: null,
+        baseCondidate: [1,2,3,4,5,6,7,8,9]
       },
       methods: {
+        init: function () {
+          this.createArrayData();
+          this.createAreas();
+
+          // console.log(this.areas);
+          // console.log(this.arrayData);
+
+        },
         clickPanel: function (col) {
           if (this.mode === null || this.num === null) {
             return;
@@ -246,6 +267,7 @@
               this.clearRowCandidates(col, this.num, false);
               this.clearColCandidates(col, this.num, false);
               this.clearAreaCandidates(col, this.num, false);
+              this.resetCandidates();
               this.setHighlight(this.num);
               break;
 
@@ -256,6 +278,7 @@
               this.clearRowCandidates(col, this.num, true);
               this.clearColCandidates(col, this.num, true);
               this.clearAreaCandidates(col, this.num, true);
+              this.resetCandidates();
               this.setHighlight(this.num);
 
               break;
@@ -277,6 +300,7 @@
               this.clearRowCandidates(col, this.num, false);
               this.clearColCandidates(col, this.num, false);
               this.clearAreaCandidates(col, this.num, false);
+              this.resetCandidates();
               this.setHighlight(this.num);
 
               break;
@@ -288,6 +312,7 @@
               this.clearRowCandidates(col, this.num, true);
               this.clearColCandidates(col, this.num, true);
               this.clearAreaCandidates(col, this.num, true);
+              this.resetCandidates();
               this.setHighlight(this.num);
               break;
             default:
@@ -295,6 +320,30 @@
           }
 
 
+        },
+        createAreas: function () {
+          this.areas = {};
+          for (var i = 1; i < 10; i++) {
+            for (var j = 1; j < 10; j++) {
+              var targetCol = this.arrayData[i][j];
+              // console.log("createAreas  rownum:" + targetCol.rownum + " colnum:" + targetCol.colnum);
+              //エリアを算出
+              var areanum = calcArea(i, j);
+              if (!this.areas[areanum]) {
+                this.areas[areanum] = [];
+              }
+              this.areas[areanum].push(targetCol);
+            }
+          }
+        },
+        createArrayData: function () {
+          this.arrayData = createEmptyArr();
+          for (var i = 1; i < 10; i++) {
+            for (var j = 1; j < 10; j++) {
+              var row = this.maindata[i - 1];
+              this.arrayData[i][j] = row.columns[j - 1];
+            }
+          }
         },
         setDetermined: function (num) {
           console.log("setDetermined: ");
@@ -325,21 +374,21 @@
         },
         clearRowCandidates: function (col, num, setBool) {
           for (var i = 1; i < 10; i++) {
-            var targetCol = this.dataset.arrayData[col.rownum][i];
+            var targetCol = this.arrayData[col.rownum][i];
             var prop = "num" + num;
             targetCol.candidates[prop] = setBool;
           }
         },
         clearColCandidates: function (col, num, setBool) {
           for (var i = 1; i < 10; i++) {
-            var targetCol = this.dataset.arrayData[i][col.colnum];
+            var targetCol = this.arrayData[i][col.colnum];
             var prop = "num" + num;
             targetCol.candidates[prop] = setBool;
           }
 
         },
         clearAreaCandidates: function (col, num, setBool) {
-          var area = this.dataset.areas[col.areanum];
+          var area = this.areas[col.areanum];
           for (var i = 0; i < 9; i++) {
             var targetCol = area[i];
             var prop = "num" + num;
@@ -352,22 +401,183 @@
             for (var j = 1; j < 10; j++) {
 
               //１パネルずつ見ていく
-              var targetCol = this.dataset.arrayData[i][j];
-              console.log(targetCol);
+              var targetCol = this.arrayData[i][j];
+
+              targetCol.isHighlight = false;
+              targetCol.isOnlyOne = false;
+
+              // console.log(targetCol);
               if (targetCol.commit) {
                 //コミット済みはハイライトしない
                 targetCol.isHighlight = false;
-                return;
+                continue;
               }
 
               var prop = "num" + num;
+              // console.log("i:" + i + "  j:" + j + "  prop:" + prop);
               if (targetCol.candidates[prop]) {
+                //候補に存在する場合はハイライト
                 targetCol.isHighlight = true;
+
+
+                //１個しか無いものあぶり出し
+                var candidatesCount = 0;
+                for (k = 1; k < 10; k++) {
+                  if (targetCol.candidates[("num" + k)]) {
+                    candidatesCount++;
+                  }
+                }
+                if(candidatesCount == 1){
+                  targetCol.isOnlyOne = true;
+                }else{
+                  targetCol.isOnlyOne = false;
+                }
+
+
               } else {
-                targetCol.isHighlight = false;
+                // targetCol.isHighlight = false;
+                // targetCol.isOnlyOne = false;
+                
+              }
+            }
+          }
+        },
+        resetCandidates: function () {
+          for (var i = 1; i < 10; i++) {
+            for (var j = 1; j < 10; j++) {
+
+              var targetCol = this.arrayData[i][j];
+
+              if(targetCol.commit){
+                // console.log("iscommit i:" + i + "  j:" + j);
+                this.clearCondidates(targetCol);
+                continue;
               }
 
+              // 行列の固定値を取得
+              var rowsCommits = this.getCommitRow(j);
+              var colsCommits = this.getCommitCol(i);
+
+              //エリアの固定値を取得
+              var areasCommits = this.getCommitArea(targetCol.areanum);
+              // console.log("----------------------------------------------------------------------");
+
+              // console.log(rowsCommits);
+              // console.log(colsCommits);
+              // console.log(areasCommits);
+              var commits = _.union(rowsCommits, colsCommits, areasCommits);
+              var commitsUniq = _.uniq(commits);
+
+              // console.log(commits);
+              // console.log(commitsUniq);
+
+
+              this.setCodidate(targetCol, commitsUniq);
             }
+          }
+        },
+        setCodidate(col, commits){
+
+          var that = this;
+
+          //コミットに含まれているものがあれば候補から消し、含まれていないものは残す
+          _.each(that.baseCondidate , function(num){
+            // console.log("判定");
+            // console.log(that.baseCondidate);
+            // console.log(num + "");
+            // console.log(commits);
+            
+            if(_.indexOf(commits, num) >= 0){
+              col.candidates[("num" + num)] = false;
+              // console.log("消し:" + num);
+            }else{
+              col.candidates[("num" + num)] = true; 
+              // console.log("消さない:" + num + " index:" + _.indexOf(commits, num)); 
+            }
+          });
+          
+        },
+        getCommitRow: function (colnum) {
+          // var candidatesRows = [];
+          var commitNums = [];
+          for (var i = 1; i < 10; i++) {
+            //１パネルずつ見ていく
+            var targetCol = this.arrayData[i][colnum];
+            
+            //確定しているものがあるなら確定しているもののみ
+            if(targetCol.determined){
+              commitNums.push(targetCol.determinedNumber * 1);
+              continue;
+            }
+
+            if(targetCol.commit){
+              commitNums.push(targetCol.commitNumber * 1);
+
+              continue;
+            }
+            
+            // //候補
+            // var targetArr = targetCol.getCandidatesNumArr();
+            // candidatesRows = _.union(candidatesRows, targetArr);
+          }
+          return commitNums;
+        },
+        getCommitCol: function (rownum) {
+          // var candidatesCols = [];
+          var commitNums = [];
+          for (var i = 1; i < 10; i++) {
+            //１パネルずつ見ていく
+            var targetCol = this.arrayData[rownum][i];
+
+            //確定しているものがあるなら確定しているもののみ
+            if(targetCol.determined){
+              commitNums.push(targetCol.determinedNumber * 1);
+              continue;
+            }
+
+            if(targetCol.commit){
+              commitNums.push(targetCol.commitNumber * 1);
+
+              continue;
+            }
+            
+
+            // var targetArr = targetCol.getCandidatesNumArr();
+            // candidatesCols = _.union(candidatesCols, targetArr);
+          }
+          return commitNums;
+        },
+        getCommitArea: function (areanum) {
+          // var candidatesAreas = [];
+          var commitNums = [];
+
+          var targetAreaColArr = this.areas[areanum]
+          _.each(targetAreaColArr, function (targetCol) {
+
+
+            //確定しているものがあるなら確定しているもののみ
+            if(targetCol.determined){
+              commitNums.push(targetCol.determinedNumber * 1);
+              return;
+            }
+
+            if(targetCol.commit){
+              commitNums.push(targetCol.commitNumber * 1);
+
+              return;
+            }
+
+            // var targetArr = targetCol.getCandidatesNumArr();
+            // candidatesAreas = _.union(candidatesAreas, targetArr);
+          })
+
+          return commitNums;
+        },
+        clearCondidates: function(col){
+          for (var i = 1; i < 10; i++) {
+            var prop = "num" + i;
+            // console.log("clearCondidates:" + prop);
+            col.candidates[prop] = false;
           }
         },
         clearHighLight: function () {
@@ -376,46 +586,37 @@
             for (var j = 1; j < 10; j++) {
 
               //１パネルずつ見ていく
-              var targetCol = this.dataset.arrayData[i][j];
+              var targetCol = this.arrayData[i][j];
               targetCol.isHighlight = false;
             }
           }
+          this.mode = null;
+          this.num = null;
         },
         saveBoard: function () {
           console.log("save data.");
-          //localStorage.setItem("arrayData", JSON.stringify(this.dataset.arrayData));
-          //localStorage.setItem("areas", JSON.stringify(this.dataset.areas));
-          //localStorage.setItem("maindata", JSON.stringify(this.dataset.maindata));
-          
-          localStorage.setItem("dataset", JSON.stringify(this.dataset));
+          localStorage.setItem("maindata", JSON.stringify(this.maindata));
+
         },
         loadBoard: function () {
           console.log("load data.");
-          //this.dataset.arrayData = JSON.parse(localStorage.getItem("arrayData"));
-          //this.dataset.areas = JSON.parse(localStorage.getItem("areas"));
-          //this.dataset.maindata = JSON.parse(localStorage.getItem("maindata"));
-          
-          //this.$set(this.dataset, 'arrayData', JSON.parse(localStorage.getItem("arrayData")));
-          //this.$set(this.dataset, 'areas', JSON.parse(localStorage.getItem("areas")));
-          //this.$set(this.dataset, 'maindata', JSON.parse(localStorage.getItem("maindata")));
-
-          this.$set(this, 'dataset', JSON.parse(localStorage.getItem("dataset")));
+          this.maindata = JSON.parse(localStorage.getItem("maindata"));
+          this.createArrayData();
+          this.createAreas();
 
           this.clearHighLight();
-          this.$forceUpdate();
         },
         clearBoard: function () {
           console.log("clear data.");
-          var dataset = createDataset();
-          this.dataset.arrayData = dataset.arrayData;
-          this.dataset.areas = dataset.areas;
-          this.dataset.maindata = dataset.maindata;
+          this.maindata = createMainData();
+          this.createArrayData();
+          this.createAreas();
 
         }
       }
     });
 
-
+    vm.init();
 
 
     $('input[name="options0"]:radio').change(function () {
@@ -426,6 +627,7 @@
         vm.setDeterminedClear();
       }
       vm.setHighlight(radioval);
+      // vm.resetCandidates();
       // console.log(radioval);
       $('input[name="options1"]:radio').parent().removeClass("active");
       $('input[name="options2"]:radio').parent().removeClass("active");
@@ -455,6 +657,7 @@
         vm.setCommitClear();
       }
       vm.setHighlight(radioval);
+      // vm.resetCandidates();
       $('input[name="options0"]:radio').parent().removeClass("active");
       $('input[name="options1"]:radio').parent().removeClass("active");
       $('input[name="options2"]:radio').parent().removeClass("active");
