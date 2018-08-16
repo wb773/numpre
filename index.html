@@ -93,7 +93,7 @@
               </div>
             </div>
             <!-- エリアのカウント -->
-            <div style=" height: 25px; width: 25px; margin: 2px" class="float-right">
+            <div v-if="!col.determined && !col.commit && col.areacount != 0" style=" height: 25px; width: 25px; margin: 2px" class="float-right">
               <div style="font-size: 10px; display: flex; align-items: center; justify-content: center;">
                 {{col.areacount}}
               </div>
@@ -249,6 +249,10 @@
                   candidatesNumArr.push(i);
                 }
               }
+            },
+            hasCondidateNum: function(num){
+              var prop = "num" + num;              
+              return this.candidates[prop];
             },
             isOnlyOne: false
           }
@@ -526,9 +530,21 @@
           for (var i = 1; i < 10; i++) {
             for (var j = 1; j < 10; j++) {
               //エリアを算出
+              var targetCol = this.arrayData[i][j];
+
               var areanum = calcArea(i, j);
               var targetArea = this.areas[areanum];
               
+              var areaManager = new AreaManager();
+              areaManager.area = targetArea;
+              
+              var areaCount = areaManager.getCondidateCount(this.num);
+              if(targetCol.hasCondidateNum(this.num)){
+                targetCol.areacount = areaCount;
+              }else{
+                targetCol.areacount = 0;
+              }
+
             }
           }
         },
@@ -670,12 +686,14 @@
 
     vm.init();
 
-    var areaManager = {
-      area: [], //エリアはセルの配列
-      getCondidateCount: function (num) {
+    class AreaManager {
+      constructor(){
+        this.area = []; //エリアはセルの配列
+      }
+      getCondidateCount(num) {
         //エリアに対象の数値がいくつあるか調べる
         var count = 0;
-        for (var i = 1; i < 10; i++) {
+        for (var i = 0; i < 9; i++) {
           var targetCol = this.area[i];
           var prop = "num" + num;
           if (targetCol.candidates[prop]) {
