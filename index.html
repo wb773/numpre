@@ -249,9 +249,6 @@
           this.createArrayData();
           this.createAreas();
 
-          // console.log(this.areas);
-          // console.log(this.arrayData);
-
         },
         clickPanel: function (col) {
           if (this.mode === null || this.num === null) {
@@ -448,31 +445,32 @@
 
               var targetCol = this.arrayData[i][j];
 
+              // コミットされてる場合は内容をすべてクリアして次へ
               if(targetCol.commit){
-                // console.log("iscommit i:" + i + "  j:" + j);
                 this.clearCondidates(targetCol);
                 continue;
               }
-
+              
+              //------------------------------------------------------------------
+              // 基本のチェック
+              //------------------------------------------------------------------
               // 行列の固定値を取得
               var rowsCommits = this.getCommitRow(j);
               var colsCommits = this.getCommitCol(i);
 
               //エリアの固定値を取得
               var areasCommits = this.getCommitArea(targetCol.areanum);
-              // console.log("----------------------------------------------------------------------");
-
-              // console.log(rowsCommits);
-              // console.log(colsCommits);
-              // console.log(areasCommits);
               var commits = _.union(rowsCommits, colsCommits, areasCommits);
               var commitsUniq = _.uniq(commits);
-
-              // console.log(commits);
-              // console.log(commitsUniq);
-
-
               this.setCodidate(targetCol, commitsUniq);
+
+              //------------------------------------------------------------------
+              // エリアの中に縦横一列にしか候補が存在しない場合、その軸の他エリアの候補を消す（この操作による変化がなくなるまで再帰的に候補を消す）
+              //------------------------------------------------------------------
+              
+              
+
+
             }
           }
         },
@@ -516,9 +514,6 @@
               continue;
             }
             
-            // //候補
-            // var targetArr = targetCol.getCandidatesNumArr();
-            // candidatesRows = _.union(candidatesRows, targetArr);
           }
           return commitNums;
         },
@@ -541,9 +536,6 @@
               continue;
             }
             
-
-            // var targetArr = targetCol.getCandidatesNumArr();
-            // candidatesCols = _.union(candidatesCols, targetArr);
           }
           return commitNums;
         },
@@ -567,8 +559,6 @@
               return;
             }
 
-            // var targetArr = targetCol.getCandidatesNumArr();
-            // candidatesAreas = _.union(candidatesAreas, targetArr);
           })
 
           return commitNums;
