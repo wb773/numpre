@@ -20,6 +20,24 @@
     .onlyOne {
       background-color: aquamarine
     }
+
+    .borderNormal {
+      border: solid 1px red; width: 75px;
+    }
+
+    .isAreaTop {
+      border-top: solid 3px black; width: 75px;
+    }
+    .isAreaRight {
+      border-right: solid 3px black; width: 75px;
+    }
+    .isAreaBottom {
+      border-bottom: solid 3px black; width: 75px;
+    }
+    .isAreaLeft {
+      border-left: solid 3px black; width: 75px;
+    }
+
   </style>
 </head>
 
@@ -28,8 +46,8 @@
     <div class="container">
       <div style="margin:30px">
         <div class="row justify-content-md-center" v-for="row in maindata">
-          <div v-for="col in row.columns" style="border: solid 1px red; width: 75px; height: 75px; margin: 0 0 -1px -1px ; " v-on:click='clickPanel(col)'
-            v-bind:class="{ highLight: col.isHighlight , onlyOne: col.isOnlyOne}">
+          <div v-for="col in row.columns" class="borderNormal" style=" width: 75px; height: 75px; margin: 0 0 -1px -1px ; " v-on:click='clickPanel(col)'
+            v-bind:class="{ highLight: col.isHighlight , onlyOne: col.isOnlyOne, isAreaTop: col.isAreaTop, isAreaRight: col.isAreaRight, isAreaBottom: col.isAreaBottom, isAreaLeft: col.isAreaLeft}">
 
             <!-- 問題として提出される値 -->
             <div v-if="col.determined" style="background-color: yellow; height:100%; display: flex; align-items: center; justify-content: center;">
@@ -72,6 +90,12 @@
             <div v-if="!col.determined" style="border: gray solid 1px; height: 25px; width: 25px; margin: 2px" class="float-right">
               <div v-if="col.commit" style="font-size: 16px; display: flex; align-items: center; justify-content: center;">
                 {{col.commitNumber}}
+              </div>
+            </div>
+            <!-- エリアのカウント -->
+            <div style=" height: 25px; width: 25px; margin: 2px" class="float-right">
+              <div style="font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                {{col.areacount}}
               </div>
             </div>
 
@@ -195,6 +219,11 @@
           var col = {
             id: ++id,
             areanum: areanum,
+            areacount: 0,
+            isAreaTop: false,
+            isAreaRight: false,
+            isAreaBottom: false,
+            isAreaLeft: false,
             rownum: i,
             colnum: j,
             determined: false,  //問題の値
@@ -223,6 +252,23 @@
             },
             isOnlyOne: false
           }
+
+          //位置情報
+          // if(i % 3 == 1){
+          //   col.isAreaTop = true;
+          // }
+          if(i % 3 == 0){
+            col.isAreaBottom = true;
+          }
+          // if(j % 3 == 1){
+          //   col.isAreaLeft = true;
+          // }
+          if(j % 3 == 0){
+            col.isAreaRight = true;
+          }
+
+
+          //各配列への展開
           dataset.arrayData[i][j] = col;
           row.columns.push(col);
           dataset.areas[areanum].push(col);
@@ -242,7 +288,7 @@
         arrayData: null,
         mode: null,
         num: null,
-        baseCondidate: [1,2,3,4,5,6,7,8,9]
+        baseCondidate: [1, 2, 3, 4, 5, 6, 7, 8, 9]
       },
       methods: {
         init: function () {
@@ -424,9 +470,9 @@
                     candidatesCount++;
                   }
                 }
-                if(candidatesCount == 1){
+                if (candidatesCount == 1) {
                   targetCol.isOnlyOne = true;
-                }else{
+                } else {
                   targetCol.isOnlyOne = false;
                 }
 
@@ -434,7 +480,7 @@
               } else {
                 // targetCol.isHighlight = false;
                 // targetCol.isOnlyOne = false;
-                
+
               }
             }
           }
@@ -446,11 +492,11 @@
               var targetCol = this.arrayData[i][j];
 
               // コミットされてる場合は内容をすべてクリアして次へ
-              if(targetCol.commit){
+              if (targetCol.commit) {
                 this.clearCondidates(targetCol);
                 continue;
               }
-              
+
               //------------------------------------------------------------------
               // 基本のチェック
               //------------------------------------------------------------------
@@ -467,33 +513,49 @@
               //------------------------------------------------------------------
               // エリアの中に縦横一列にしか候補が存在しない場合、その軸の他エリアの候補を消す（この操作による変化がなくなるまで再帰的に候補を消す）
               //------------------------------------------------------------------
-              
-              
-
+              this.setAreaCount();
 
             }
           }
         },
-        setCodidate(col, commits){
+        // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // エリアカウント設定
+        // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        setAreaCount() {
+          //すべてのエリアに対して行う処理
+          for (var i = 1; i < 10; i++) {
+            for (var j = 1; j < 10; j++) {
+              //エリアを算出
+              var areanum = calcArea(i, j);
+              var targetArea = this.areas[areanum];
+              
+            }
+          }
+        },
+
+        // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // 
+        // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        setCodidate(col, commits) {
 
           var that = this;
 
           //コミットに含まれているものがあれば候補から消し、含まれていないものは残す
-          _.each(that.baseCondidate , function(num){
+          _.each(that.baseCondidate, function (num) {
             // console.log("判定");
             // console.log(that.baseCondidate);
             // console.log(num + "");
             // console.log(commits);
-            
-            if(_.indexOf(commits, num) >= 0){
+
+            if (_.indexOf(commits, num) >= 0) {
               col.candidates[("num" + num)] = false;
               // console.log("消し:" + num);
-            }else{
-              col.candidates[("num" + num)] = true; 
+            } else {
+              col.candidates[("num" + num)] = true;
               // console.log("消さない:" + num + " index:" + _.indexOf(commits, num)); 
             }
           });
-          
+
         },
         getCommitRow: function (colnum) {
           // var candidatesRows = [];
@@ -501,19 +563,19 @@
           for (var i = 1; i < 10; i++) {
             //１パネルずつ見ていく
             var targetCol = this.arrayData[i][colnum];
-            
+
             //確定しているものがあるなら確定しているもののみ
-            if(targetCol.determined){
+            if (targetCol.determined) {
               commitNums.push(targetCol.determinedNumber * 1);
               continue;
             }
 
-            if(targetCol.commit){
+            if (targetCol.commit) {
               commitNums.push(targetCol.commitNumber * 1);
 
               continue;
             }
-            
+
           }
           return commitNums;
         },
@@ -525,22 +587,22 @@
             var targetCol = this.arrayData[rownum][i];
 
             //確定しているものがあるなら確定しているもののみ
-            if(targetCol.determined){
+            if (targetCol.determined) {
               commitNums.push(targetCol.determinedNumber * 1);
               continue;
             }
 
-            if(targetCol.commit){
+            if (targetCol.commit) {
               commitNums.push(targetCol.commitNumber * 1);
 
               continue;
             }
-            
+
           }
           return commitNums;
         },
         getCommitArea: function (areanum) {
-          // var candidatesAreas = [];
+
           var commitNums = [];
 
           var targetAreaColArr = this.areas[areanum]
@@ -548,12 +610,12 @@
 
 
             //確定しているものがあるなら確定しているもののみ
-            if(targetCol.determined){
+            if (targetCol.determined) {
               commitNums.push(targetCol.determinedNumber * 1);
               return;
             }
 
-            if(targetCol.commit){
+            if (targetCol.commit) {
               commitNums.push(targetCol.commitNumber * 1);
 
               return;
@@ -563,7 +625,7 @@
 
           return commitNums;
         },
-        clearCondidates: function(col){
+        clearCondidates: function (col) {
           for (var i = 1; i < 10; i++) {
             var prop = "num" + i;
             // console.log("clearCondidates:" + prop);
@@ -608,6 +670,21 @@
 
     vm.init();
 
+    var areaManager = {
+      area: [], //エリアはセルの配列
+      getCondidateCount: function (num) {
+        //エリアに対象の数値がいくつあるか調べる
+        var count = 0;
+        for (var i = 1; i < 10; i++) {
+          var targetCol = this.area[i];
+          var prop = "num" + num;
+          if (targetCol.candidates[prop]) {
+            count++;
+          }
+        }
+        return count;
+      }
+    }
 
     $('input[name="options0"]:radio').change(function () {
       var radioval = $(this).val();
