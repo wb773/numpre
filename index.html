@@ -22,22 +22,29 @@
     }
 
     .borderNormal {
-      border: solid 1px red; width: 75px;
+      border: solid 1px red;
+      width: 75px;
     }
 
     .isAreaTop {
-      border-top: solid 3px black; width: 75px;
-    }
-    .isAreaRight {
-      border-right: solid 3px black; width: 75px;
-    }
-    .isAreaBottom {
-      border-bottom: solid 3px black; width: 75px;
-    }
-    .isAreaLeft {
-      border-left: solid 3px black; width: 75px;
+      border-top: solid 3px black;
+      width: 75px;
     }
 
+    .isAreaRight {
+      border-right: solid 3px black;
+      width: 75px;
+    }
+
+    .isAreaBottom {
+      border-bottom: solid 3px black;
+      width: 75px;
+    }
+
+    .isAreaLeft {
+      border-left: solid 3px black;
+      width: 75px;
+    }
   </style>
 </head>
 
@@ -250,8 +257,8 @@
                 }
               }
             },
-            hasCondidateNum: function(num){
-              var prop = "num" + num;              
+            hasCondidateNum: function (num) {
+              var prop = "num" + num;
               return this.candidates[prop];
             },
             isOnlyOne: false
@@ -261,13 +268,13 @@
           // if(i % 3 == 1){
           //   col.isAreaTop = true;
           // }
-          if(i % 3 == 0){
+          if (i % 3 == 0) {
             col.isAreaBottom = true;
           }
           // if(j % 3 == 1){
           //   col.isAreaLeft = true;
           // }
-          if(j % 3 == 0){
+          if (j % 3 == 0) {
             col.isAreaRight = true;
           }
 
@@ -529,22 +536,32 @@
           //すべてのエリアに対して行う処理
           for (var i = 1; i < 10; i++) {
             for (var j = 1; j < 10; j++) {
-              //エリアを算出
+
               var targetCol = this.arrayData[i][j];
 
+              //エリアを算出
               var areanum = calcArea(i, j);
               var targetArea = this.areas[areanum];
-              
+
               var areaManager = new AreaManager();
               areaManager.area = targetArea;
-              
+
+              //エリアカウントをセット
               var areaCount = areaManager.getCondidateCount(this.num);
-              if(targetCol.hasCondidateNum(this.num)){
+              if (targetCol.hasCondidateNum(this.num)) {
                 targetCol.areacount = areaCount;
-              }else{
+              } else {
                 targetCol.areacount = 0;
               }
 
+              //エリアカウントが２以上３以下の場合、同じ列か同じ行にのみあるかを確認する
+              //行確認
+
+              //列確認
+
+              //同じ行か列の場合、その軸の他のエリアの候補を消す
+
+              //その後ループをはじめからやり直す
             }
           }
         },
@@ -558,17 +575,11 @@
 
           //コミットに含まれているものがあれば候補から消し、含まれていないものは残す
           _.each(that.baseCondidate, function (num) {
-            // console.log("判定");
-            // console.log(that.baseCondidate);
-            // console.log(num + "");
-            // console.log(commits);
 
             if (_.indexOf(commits, num) >= 0) {
               col.candidates[("num" + num)] = false;
-              // console.log("消し:" + num);
             } else {
               col.candidates[("num" + num)] = true;
-              // console.log("消さない:" + num + " index:" + _.indexOf(commits, num)); 
             }
           });
 
@@ -687,9 +698,11 @@
     vm.init();
 
     class AreaManager {
-      constructor(){
+
+      constructor() {
         this.area = []; //エリアはセルの配列
       }
+
       getCondidateCount(num) {
         //エリアに対象の数値がいくつあるか調べる
         var count = 0;
@@ -702,6 +715,16 @@
         }
         return count;
       }
+
+      getRowNumIfOnlyLine(num) {
+
+      }
+
+      getColNumIfOnlyLine(num) {
+
+      }
+
+
     }
 
     $('input[name="options0"]:radio').change(function () {
