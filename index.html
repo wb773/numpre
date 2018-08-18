@@ -543,8 +543,7 @@
               var areanum = calcArea(i, j);
               var targetArea = this.areas[areanum];
 
-              var areaManager = new AreaManager();
-              areaManager.area = targetArea;
+              var areaManager = new AreaManager(targetArea);
 
               //エリアカウントをセット
               var areaCount = areaManager.getCondidateCount(this.num);
@@ -699,8 +698,8 @@
 
     class AreaManager {
 
-      constructor() {
-        this.area = []; //エリアはセルの配列
+      constructor(area) {
+        this.area = area; //エリアはセルの配列
       }
 
       getCondidateCount(num) {
