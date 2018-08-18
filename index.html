@@ -543,24 +543,40 @@
               var areanum = calcArea(i, j);
               var targetArea = this.areas[areanum];
 
-              var areaManager = new AreaManager(targetArea);
+              var areaManager = new AreaManager(targetArea, targetCol, this.arrayData, areanum, this.num);
 
               //エリアカウントをセット
-              var areaCount = areaManager.getCondidateCount(this.num);
+              var areaCount = areaManager.condidateCount;
               if (targetCol.hasCondidateNum(this.num)) {
                 targetCol.areacount = areaCount;
               } else {
                 targetCol.areacount = 0;
               }
 
+              // セルのすべてのアクティブな候補で検証
+
               //エリアカウントが２以上３以下の場合、同じ列か同じ行にのみあるかを確認する
-              //行確認
+              if (areaCount == 2 || areaCount == 3) {
+                console.log("areaCount = " + areaCount);
+                //行確認
+                var onlyRownum = areaManager.getRowNumIfOnlyLine();
+                if (onlyRownum > 0) {
+                  console.log("onlyRownum: " + onlyRownum);
+                  areaManager.crearCandidatesOthorAreaRow();
 
-              //列確認
+                }
+                //列確認
+                var onlyColnum = areaManager.getColNumIfOnlyLine();
+                if (onlyColnum > 0) {
+                  console.log("onlyColnum: " + onlyColnum);
+                  areaManager.crearCandidatesOthorAreaCol();
 
-              //同じ行か列の場合、その軸の他のエリアの候補を消す
+                }
 
-              //その後ループをはじめからやり直す
+                i = 0;
+                j = 0;
+
+              }
             }
           }
         },
@@ -698,16 +714,33 @@
 
     class AreaManager {
 
-      constructor(area) {
+      constructor(area, col, arrayData, areanum, num) {
         this.area = area; //エリアはセルの配列
+        this.arrayData = arrayData; 
+        this.num = num;
+        this.areanum = areanum;
+
+        this.condidateCount = 0;
+
+
+        this.initManager();
       }
 
-      getCondidateCount(num) {
+      initManager() {
+        this.condidateCount = this.getCondidateCount();
+      }
+
+      setNum(num) {
+        this.num = num;
+        this.initManager();
+      }
+
+      getCondidateCount() {
         //エリアに対象の数値がいくつあるか調べる
         var count = 0;
         for (var i = 0; i < 9; i++) {
           var targetCol = this.area[i];
-          var prop = "num" + num;
+          var prop = "num" + this.num;
           if (targetCol.candidates[prop]) {
             count++;
           }
@@ -715,15 +748,62 @@
         return count;
       }
 
-      getRowNumIfOnlyLine(num) {
-
+      getRowNumIfOnlyLine() {
+        var rownums = [];
+        for (var i = 0; i < 9; i++) {
+          var targetCol = this.area[i];
+          var prop = "num" + this.num;
+          if (targetCol.candidates[prop]) {
+            rownums.push(targetCol.rownum);
+          }
+        }
+        rownums = _.uniq(rownums);
+        if (rownums.length == 1) {
+          return rownums[0];
+        } else {
+          return 0;
+        }
       }
 
-      getColNumIfOnlyLine(num) {
-
+      getColNumIfOnlyLine() {
+        var colnums = [];
+        for (var i = 0; i < 9; i++) {
+          var targetCol = this.area[i];
+          var prop = "num" + this.num;
+          if (targetCol.candidates[prop]) {
+            colnums.push(targetCol.colnum);
+          }
+        }
+        colnums = _.uniq(colnums);
+        if (colnums.length == 1) {
+          return colnums[0];
+        } else {
+          return 0;
+        }
       }
 
 
+      crearCandidatesOthorAreaRow() {
+        for (var i = 0; i < 9; i++) {
+          var targetCol = this.arrayData[this.col.rownum][i];
+          if (targetCol.areanum == this.areanum) {
+            continue;
+          }
+          var prop = "num" + this.num;
+          targetCol.candidates[prop] = false;
+        }
+      }
+
+      crearCandidatesOtherAreaCol() {
+        for (var i = 0; i < 9; i++) {
+          var targetCol = this.arrayData[i][this.col.colnum];
+          if (targetCol.areanum == this.areanum) {
+            continue;
+          }
+          var prop = "num" + this.num;
+          targetCol.candidates[prop] = false;
+        }
+      }
     }
 
     $('input[name="options0"]:radio').change(function () {
